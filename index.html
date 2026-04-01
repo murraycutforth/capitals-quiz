@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>World Capitals Quiz</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Setup Screen -->
+  <div id="setup-screen" class="screen">
+    <h1>World Capitals Quiz</h1>
+    <p class="subtitle">Test your knowledge of world capitals</p>
+
+    <div class="setup-card">
+      <div class="form-group">
+        <label class="group-label">Continents</label>
+        <div class="select-btns">
+          <button id="select-all" class="btn-tiny">Select all</button>
+          <button id="select-none" class="btn-tiny">None</button>
+        </div>
+        <div class="continent-grid">
+          <label><input type="checkbox" class="continent-cb" value="Africa" checked> Africa</label>
+          <label><input type="checkbox" class="continent-cb" value="Asia" checked> Asia</label>
+          <label><input type="checkbox" class="continent-cb" value="Europe" checked> Europe</label>
+          <label><input type="checkbox" class="continent-cb" value="North America" checked> North America</label>
+          <label><input type="checkbox" class="continent-cb" value="South America" checked> South America</label>
+          <label><input type="checkbox" class="continent-cb" value="Oceania" checked> Oceania</label>
+        </div>
+      </div>
+
+      <div class="form-group rounds-row">
+        <label for="num-rounds">Number of rounds</label>
+        <input type="number" id="num-rounds" value="20" min="1" max="200">
+      </div>
+
+      <button id="start-btn" class="btn-primary">Start Quiz</button>
+    </div>
+  </div>
+
+  <!-- Quiz Screen -->
+  <div id="quiz-screen" class="screen hidden">
+    <div class="quiz-header">
+      <h2>World Capitals Quiz</h2>
+      <span id="score-display"></span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div id="progress-fill"></div>
+    </div>
+
+    <div class="quiz-body">
+      <!-- Left panel: previous result + question -->
+      <div class="quiz-left">
+        <!-- Previous result -->
+        <div id="prev-pane" class="hidden">
+          <h4>Previous Question</h4>
+          <div id="prev-country-name"></div>
+          <div id="prev-answer-text"></div>
+          <div id="prev-status" class="prev-status"></div>
+        </div>
+
+        <!-- Current question -->
+        <div class="question-card">
+          <div id="progress-text"></div>
+          <p class="question-label">What is the capital of</p>
+          <div id="question-country"></div>
+
+          <div class="answer-row">
+            <input type="text" id="answer-input" placeholder="Type the capital city…" autocomplete="off" spellcheck="false">
+            <button id="submit-btn">Go</button>
+          </div>
+          <div id="feedback" class="feedback"></div>
+        </div>
+      </div>
+
+      <!-- Right panel: map -->
+      <div class="quiz-right">
+        <div id="map-container">
+          <svg id="world-map"></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Screen -->
+  <div id="results-screen" class="screen hidden">
+    <h2>Quiz Complete!</h2>
+    <div id="result-score"></div>
+    <div id="result-msg"></div>
+    <button id="restart-btn" class="btn-primary" style="max-width:220px">Play Again</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
