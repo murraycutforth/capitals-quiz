@@ -93,37 +93,38 @@ function initMap() {
 
 function renderMap(targetCountry) {
   const features = state.geoFeatures;
-  const targetId = targetCountry ? String(targetCountry.id) : null;
+  const targetId = targetCountry ? String(targetCountry.id).padStart(3, '0') : null;
 
   // Choose projection: zoom to target country bbox, or fall back to full world view
   let projection, path;
   if (targetCountry && features.length > 0) {
     const targetFeature = features.find(f => String(f.id) === targetId);
     if (targetFeature) {
-      // Enforce a minimum geographic extent so small countries (e.g. Brunei)
-      // aren't zoomed in so aggressively that neighbours vanish.
-      const [[w, s], [e, n]] = d3.geoBounds(targetFeature);
-      const midLon = (w + e) / 2;
-      const midLat = (s + n) / 2;
-      const MIN_SPAN = 12; // degrees
-      const lonHalf = Math.max((e - w) / 2, MIN_SPAN / 2);
-      const latHalf = Math.max((n - s) / 2, (MIN_SPAN * MAP_H / MAP_W) / 2);
-      const fitGeom = {
-        type: 'Feature',
-        geometry: {
-          type: 'Polygon',
-          coordinates: [[
-            [midLon - lonHalf, midLat - latHalf],
-            [midLon + lonHalf, midLat - latHalf],
-            [midLon + lonHalf, midLat + latHalf],
-            [midLon - lonHalf, midLat + latHalf],
-            [midLon - lonHalf, midLat - latHalf],
-          ]],
-        },
-      };
-      const margin = 40;
+      const margin = 90;
       projection = d3.geoNaturalEarth1()
-        .fitExtent([[margin, margin], [MAP_W - margin, MAP_H - margin]], fitGeom);
+        .fitExtent([[margin, margin], [MAP_W - margin, MAP_H - margin]], targetFeature);
+
+      // For tiny countries the fit zooms in so far that neighbours vanish.
+      // Cap the scale; then recentre on the feature centroid at the capped scale
+      // using the raw (pre-scale/translate) projection coordinates so the math
+      // is exact regardless of NaturalEarth's non-linearity.
+      //
+      // At the full-world scale (MAP_W / 6.28 ≈ 127) the globe fills the canvas.
+      // MAX_SCALE = 55× that → the visible window is ~6–7° wide, enough context
+      // for the smallest countries while leaving larger ones unaffected.
+      const MAX_SCALE = (MAP_W / 6.28) * 55;
+      if (projection.scale() > MAX_SCALE) {
+        const centroid  = d3.geoCentroid(targetFeature);
+        const [px, py]  = projection(centroid);
+        const s         = projection.scale();
+        const [tx, ty]  = projection.translate();
+        // raw NaturalEarth coords of the centroid (before scale + translate)
+        const nx = (px - tx) / s;
+        const ny = (py - ty) / s;
+        projection
+          .scale(MAX_SCALE)
+          .translate([MAP_W / 2 - MAX_SCALE * nx, MAP_H / 2 - MAX_SCALE * ny]);
+      }
     }
   }
   if (!projection) {
